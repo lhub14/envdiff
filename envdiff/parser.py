@@ -73,7 +73,11 @@ def parse_env_file(filepath: str | Path) -> Dict[str, Optional[str]]:
         if value and value[0] in ('"', "'"):
             quote = value[0]
             end = value.find(quote, 1)
-            value = value[1:end] if end != -1 else value[1:]
+            if end == -1:
+                raise EnvParseError(
+                    f"Unterminated quoted value at {filepath}:{lineno}: {raw_line!r}"
+                )
+            value = value[1:end]
         else:
             # Remove inline comment
             for i, ch in enumerate(value):
