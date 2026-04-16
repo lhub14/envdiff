@@ -35,6 +35,15 @@ def test_save_multiple_labels(store: Path) -> None:
     assert set(list_baselines(store)) == {"prod", "staging"}
 
 
+def test_save_overwrites_existing_label(store: Path) -> None:
+    """Saving a baseline with an existing label should update it in place."""
+    save_baseline("prod", {"A": "1"}, store)
+    save_baseline("prod", {"A": "2"}, store)
+    bl = load_baseline("prod", store)
+    assert bl.env == {"A": "2"}
+    assert list_baselines(store) == ["prod"]
+
+
 def test_load_missing_store_raises(store: Path) -> None:
     with pytest.raises(BaselineError, match="No baseline store"):
         load_baseline("prod", store)
@@ -65,6 +74,13 @@ def test_diff_detects_missing(store: Path) -> None:
     save_baseline("base", {"A": "1", "B": "2"}, store)
     result = diff_against_baseline("base", {"A": "1"}, store)
     assert "B" in result.missing_in_target
+
+
+def test_diff_detects_extra_in_target(store: Path) -> None:
+    """Keys present in target but absent in base should appear in missing_in_base."""
+    save_baseline("base", {"A": "1"}, store)
+    result = diff_against_baseline("base", {"A": "1", "B": "2"}, store)
+    assert "B" in result.missing_in_base
 
 
 def test_diff_detects_mismatch(store: Path) -> None:
