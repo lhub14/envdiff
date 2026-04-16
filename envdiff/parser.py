@@ -62,6 +62,12 @@ def parse_env_file(filepath: str | Path) -> Dict[str, Optional[str]]:
                 f"Empty key at {filepath}:{lineno}: {raw_line!r}"
             )
 
+        if not _is_valid_key(key):
+            raise EnvParseError(
+                f"Invalid key at {filepath}:{lineno} — keys must contain only "
+                f"alphanumeric characters and underscores: {key!r}"
+            )
+
         # Strip inline comments (only outside quotes)
         value = value.strip()
         if value and value[0] in ('"', "'"):
@@ -78,3 +84,8 @@ def parse_env_file(filepath: str | Path) -> Dict[str, Optional[str]]:
         env[key] = value if value != "" else None
 
     return env
+
+
+def _is_valid_key(key: str) -> bool:
+    """Return True if the key contains only alphanumeric characters and underscores."""
+    return bool(key) and all(ch.isalnum() or ch == "_" for ch in key)
