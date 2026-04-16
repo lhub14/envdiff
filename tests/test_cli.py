@@ -62,3 +62,11 @@ def test_no_values_flag_skips_mismatch(runner, tmp_path):
     target = write(tmp_path, ".env.target", "A=new\n")
     result = runner.invoke(main, [base, target, "--no-values"])
     assert "No differences" in result.output
+
+
+def test_missing_file_error(runner, tmp_path):
+    """Invoking with a non-existent file should exit with a non-zero code."""
+    existing = write(tmp_path, ".env.base", "A=1\n")
+    missing = str(tmp_path / "does_not_exist.env")
+    result = runner.invoke(main, [existing, missing])
+    assert result.exit_code != 0
