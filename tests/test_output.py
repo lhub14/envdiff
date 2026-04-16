@@ -38,3 +38,18 @@ def test_empty_content_stdout(capsys):
     write_report(r, output_path=None)
     captured = capsys.readouterr()
     assert captured.out == ""
+
+
+def test_write_to_file_returns_path(tmp_path):
+    """write_report should return the resolved output path when writing to a file."""
+    out = tmp_path / "report.txt"
+    r = make_report("data")
+    result = write_report(r, str(out))
+    assert result == out.resolve()
+
+
+def test_write_to_stdout_returns_none(capsys):
+    """write_report should return None when writing to stdout."""
+    r = make_report("data")
+    result = write_report(r, output_path=None)
+    assert result is None
