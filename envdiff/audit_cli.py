@@ -21,7 +21,11 @@ def audit_group() -> None:
 @click.option("--tail", default=0, help="Show last N entries (0 = all).")
 def show_audit(log: str, tail: int) -> None:
     """Display recorded audit entries."""
-    entries = load_log(Path(log))
+    path = Path(log)
+    if not path.exists():
+        click.echo("Log file not found — no entries to display.")
+        return
+    entries = load_log(path)
     if tail > 0:
         entries = entries[-tail:]
     click.echo(format_audit_log(entries))
