@@ -34,9 +34,7 @@ def generate_cmd(base: str, target: str, output: str | None) -> None:
     content = patch_to_json(patch)
 
     if output:
-        Path(output).parent.mkdir(parents=True, exist_ok=True)
-        Path(output).write_text(content, encoding="utf-8")
-        click.echo(f"Patch written to {output}")
+        _write_file(Path(output), content, "Patch written to")
     else:
         click.echo(content)
 
@@ -62,8 +60,13 @@ def apply_cmd(env_file: str, patch_file: str, output: str | None) -> None:
     content = "\n".join(lines) + "\n"
 
     if output:
-        Path(output).parent.mkdir(parents=True, exist_ok=True)
-        Path(output).write_text(content, encoding="utf-8")
-        click.echo(f"Patched env written to {output}")
+        _write_file(Path(output), content, "Patched env written to")
     else:
         click.echo(content, nl=False)
+
+
+def _write_file(path: Path, content: str, message: str) -> None:
+    """Write content to path, creating parent directories as needed."""
+    path.parent.mkdir(parents=True, exist_ok=True)
+    path.write_text(content, encoding="utf-8")
+    click.echo(f"{message} {path}")
