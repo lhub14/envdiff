@@ -55,6 +55,16 @@ def test_missing_label_raises():
         detect_drift({}, bl, "prod")
 
 
+def test_multiple_changes():
+    """All three change types can appear together in a single result."""
+    bl = _baseline({"prod": {"A": "old", "B": "2"}})
+    result = detect_drift({"A": "new", "C": "3"}, bl, "prod")
+    assert result.changed == ["A"]
+    assert result.removed == ["B"]
+    assert result.added == ["C"]
+    assert result.has_drift
+
+
 # --- format_drift ---
 
 def test_format_no_drift():
@@ -70,3 +80,10 @@ def test_format_shows_sections():
     assert "+ NEW" in out
     assert "- OLD" in out
     assert "~ MOD" in out
+
+
+def test_format_includes_label():
+    """The label is always present in the formatted output, even when drift exists."""
+    r = DriftResult(label="production", added=["X"])
+    out = format_drift(r, color=False)
+    assert "production" in out
